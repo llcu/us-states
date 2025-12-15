@@ -14,24 +14,6 @@ test('it returns all fifty states', function () {
         ->toHaveKey('TX');
 });
 
-test('it returns states with territories', function () {
-    $all = States::allWithTerritories();
-
-    expect($all)
-        ->toHaveCount(56)
-        ->toHaveKey('PR')
-        ->toHaveKey('DC');
-});
-
-test('it returns only territories', function () {
-    $territories = States::territories();
-
-    expect($territories)
-        ->toHaveKey('DC')
-        ->toHaveKey('PR')
-        ->not->toHaveKey('CA');
-});
-
 test('it gets state name by abbreviation', function (string $abbreviation, string $expectedName) {
     expect(States::getName($abbreviation))->toBe($expectedName);
 })->with([
@@ -39,7 +21,6 @@ test('it gets state name by abbreviation', function (string $abbreviation, strin
     ['ca', 'California'],
     ['NY', 'New York'],
     ['TX', 'Texas'],
-    ['DC', 'District of Columbia'],
 ]);
 
 test('it returns null for invalid abbreviation', function () {
@@ -63,19 +44,11 @@ test('it returns null for invalid name', function () {
 test('it validates state abbreviation', function () {
     expect( States::isValidState( 'CA' ) )->toBeTrue()
                                           ->and( States::isValidState( 'ca' ) )->toBeTrue()
-                                          ->and( States::isValidState( 'DC' ) )->toBeFalse()
                                           ->and( States::isValidState( 'XX' ) )->toBeFalse();
-});
-
-test('it validates territory abbreviation', function () {
-    expect( States::isValidTerritory( 'DC' ) )->toBeTrue()
-                                              ->and( States::isValidTerritory( 'PR' ) )->toBeTrue()
-                                              ->and( States::isValidTerritory( 'CA' ) )->toBeFalse();
 });
 
 test('it validates any abbreviation', function () {
     expect( States::isValid( 'CA' ) )->toBeTrue()
-                                     ->and( States::isValid( 'DC' ) )->toBeTrue()
                                      ->and( States::isValid( 'XX' ) )->toBeFalse();
 });
 
@@ -116,28 +89,12 @@ test('it returns empty array for empty search', function () {
                                   ->and( States::search( '   ' ) )->toBe( [] );
 });
 
-test('it returns select options', function () {
-    $options = States::asSelectOptions();
-
-    expect($options)
-        ->toHaveKey('CA')
-        ->not->toHaveKey('');
-});
-
 test('it returns select options with placeholder', function () {
-    $options = States::asSelectOptions(false, 'Select a state...');
+    $options = States::asSelectOptions('Select a state...');
 
     expect($options)
         ->toHaveKey('')
         ->and($options[''])->toBe('Select a state...');
-});
-
-test('it returns select options with territories', function () {
-    $options = States::asSelectOptions(true);
-
-    expect($options)
-        ->toHaveKey('DC')
-        ->toHaveKey('PR');
 });
 
 test('it returns random state', function () {
