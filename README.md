@@ -1,111 +1,130 @@
-# US States List
+# LLCU US States
 
-A PHP package that provides a convenient way to work with US states list using static methods.
+A simple PHP package providing US states data with static method access.
+
+## Requirements
+
+- PHP 8.1 or higher
 
 ## Installation
 
-Install via Composer:
-
 ```bash
-composer require llcu/us-states-list
+composer require llcu/us-states
 ```
 
 ## Usage
 
-The package provides a `USStates` class with three static methods to work with US states data.
+All methods are static, so no instantiation is required.
 
 ### Get All States
 
-Returns an associative array with state prefixes as keys and state names as values:
-
 ```php
-use Llcu\USStatesList\USStates;
+use LLCU\UsStates\States;
 
-$states = USStates::getStates();
+// Get all 50 US states (abbreviation => name)
+$states = States::all();
+// ['AL' => 'Alabama', 'AK' => 'Alaska', ...]
 
-// Returns:
-// [
-//     'AL' => 'Alabama',
-//     'AK' => 'Alaska',
-//     'AZ' => 'Arizona',
-//     ...
-// ]
+// Get states including territories
+$all = States::allWithTerritories();
+
+// Get only territories
+$territories = States::territories();
 ```
 
-### Get All States with Overrides
-
-You can override or add custom states by passing an array:
+### Lookup Methods
 
 ```php
-$overrides = [
-    'AL' => 'Custom Alabama Name',
-    'XX' => 'Custom State'
-];
+// Get state name by abbreviation
+$name = States::getName('CA');
+// 'California'
 
-$states = USStates::getStates($overrides);
-
-// 'AL' will have the custom name
-// 'XX' will be added to the list
+// Get abbreviation by state name
+$abbr = States::getAbbreviation('California');
+// 'CA'
 ```
 
-### Get State Names Only
-
-Returns an indexed array containing only the state names:
+### Validation
 
 ```php
-$names = USStates::getStateNames();
+// Check if valid state
+States::isValidState('CA');      // true
+States::isValidState('DC');      // false (DC is a territory)
 
-// Returns:
-// ['Alabama', 'Alaska', 'Arizona', ...]
+// Check if valid territory
+States::isValidTerritory('DC');  // true
+States::isValidTerritory('CA');  // false
+
+// Check if valid state OR territory
+States::isValid('CA');           // true
+States::isValid('DC');           // true
+States::isValid('XX');           // false
 ```
 
-### Get State Prefixes Only
-
-Returns an indexed array containing only the state prefixes:
+### Lists
 
 ```php
-$prefixes = USStates::getStatePrefixes();
-
-// Returns:
+// Get all abbreviations
+$abbreviations = States::abbreviations();
 // ['AL', 'AK', 'AZ', ...]
+
+// Get all names
+$names = States::names();
+// ['Alabama', 'Alaska', 'Arizona', ...]
+
+// Get count
+$count = States::count();
+// 50
 ```
 
-### All Methods Support Overrides
-
-All methods accept an optional `$overrides` parameter:
+### Search
 
 ```php
-// Override with custom values
-$names = USStates::getStateNames(['AL' => 'Modified Alabama']);
-
-// Add new entries
-$prefixes = USStates::getStatePrefixes(['XX' => 'Custom State']);
+// Search states by partial name
+$results = States::search('new');
+// ['NH' => 'New Hampshire', 'NJ' => 'New Jersey', 'NM' => 'New Mexico', 'NY' => 'New York']
 ```
 
-## Features
+### HTML Select Options
 
-- ✅ PHP 7.2+ compatible
-- ✅ Uses proper PHP namespaces and classes
-- ✅ All methods are static
-- ✅ Supports overriding default states
-- ✅ Three convenient methods for different use cases
-- ✅ Fully tested with PHPUnit
-- ✅ PSR-4 autoloading
+```php
+// Basic options
+$options = States::asSelectOptions();
+
+// With placeholder
+$options = States::asSelectOptions(false, 'Select a state...');
+// ['' => 'Select a state...', 'AL' => 'Alabama', ...]
+
+// Including territories
+$options = States::asSelectOptions(true, 'Select...');
+```
+
+### Random State
+
+```php
+$random = States::random();
+// ['abbreviation' => 'CA', 'name' => 'California']
+```
+
+## API Reference
+
+| Method | Parameters | Returns | Description |
+|--------|------------|---------|-------------|
+| `all()` | - | `array<string, string>` | All 50 US states |
+| `allWithTerritories()` | - | `array<string, string>` | States + territories |
+| `territories()` | - | `array<string, string>` | Only territories |
+| `getName()` | `string $abbreviation` | `?string` | Get name by abbreviation |
+| `getAbbreviation()` | `string $name` | `?string` | Get abbreviation by name |
+| `isValidState()` | `string $abbreviation` | `bool` | Validate state abbreviation |
+| `isValidTerritory()` | `string $abbreviation` | `bool` | Validate territory abbreviation |
+| `isValid()` | `string $abbreviation` | `bool` | Validate any abbreviation |
+| `abbreviations()` | - | `array<int, string>` | List of all abbreviations |
+| `names()` | - | `array<int, string>` | List of all names |
+| `count()` | - | `int` | Number of states (50) |
+| `search()` | `string $query` | `array<string, string>` | Search by partial name |
+| `asSelectOptions()` | `bool $includeTerritories`, `string $placeholder` | `array<string, string>` | HTML select options |
+| `random()` | - | `array{abbreviation: string, name: string}` | Random state |
 
 ## Testing
 
-Run the test suite:
-
-```bash
-composer test
-```
-
-Or directly with PHPUnit:
-
-```bash
-./vendor/bin/phpunit
-```
-
-## License
-
-MIT
+This project uses [Pest](https://pestphp.com/) for testing.
