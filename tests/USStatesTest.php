@@ -1,96 +1,150 @@
 <?php
 
-namespace Llcu\USStatesList\Tests;
+declare(strict_types=1);
 
-use Llcu\USStatesList\USStates;
-use PHPUnit\Framework\TestCase;
+use LLCU\UsStates\States;
 
-class USStatesTest extends TestCase
-{
-    public function testGetStatesReturnsAllStates()
-    {
-        $states = USStates::getStates();
-        
-        $this->assertIsArray($states);
-        $this->assertCount(50, $states);
-        $this->assertArrayHasKey('AL', $states);
-        $this->assertEquals('Alabama', $states['AL']);
-        $this->assertArrayHasKey('WY', $states);
-        $this->assertEquals('Wyoming', $states['WY']);
-    }
+test('it returns all fifty states', function () {
+    $states = States::all();
 
-    public function testGetStatesWithOverrides()
-    {
-        $overrides = [
-            'AL' => 'Custom Alabama',
-            'XX' => 'Custom State'
-        ];
-        
-        $states = USStates::getStates($overrides);
-        
-        $this->assertCount(51, $states);
-        $this->assertEquals('Custom Alabama', $states['AL']);
-        $this->assertEquals('Custom State', $states['XX']);
-        $this->assertEquals('California', $states['CA']);
-    }
+    expect($states)
+        ->toHaveCount(50)
+        ->toHaveKey('CA')
+        ->toHaveKey('NY')
+        ->toHaveKey('TX');
+});
 
-    public function testGetStateNamesReturnsOnlyNames()
-    {
-        $names = USStates::getStateNames();
-        
-        $this->assertIsArray($names);
-        $this->assertCount(50, $names);
-        $this->assertContains('Alabama', $names);
-        $this->assertContains('Wyoming', $names);
-        $this->assertNotContains('AL', $names);
-        $this->assertNotContains('WY', $names);
-    }
+test('it returns states with territories', function () {
+    $all = States::allWithTerritories();
 
-    public function testGetStateNamesWithOverrides()
-    {
-        $overrides = [
-            'AL' => 'Custom Alabama',
-            'XX' => 'Custom State'
-        ];
-        
-        $names = USStates::getStateNames($overrides);
-        
-        $this->assertCount(51, $names);
-        $this->assertContains('Custom Alabama', $names);
-        $this->assertContains('Custom State', $names);
-    }
+    expect($all)
+        ->toHaveCount(56)
+        ->toHaveKey('PR')
+        ->toHaveKey('DC');
+});
 
-    public function testGetStatePrefixesReturnsOnlyPrefixes()
-    {
-        $prefixes = USStates::getStatePrefixes();
-        
-        $this->assertIsArray($prefixes);
-        $this->assertCount(50, $prefixes);
-        $this->assertContains('AL', $prefixes);
-        $this->assertContains('WY', $prefixes);
-        $this->assertNotContains('Alabama', $prefixes);
-        $this->assertNotContains('Wyoming', $prefixes);
-    }
+test('it returns only territories', function () {
+    $territories = States::territories();
 
-    public function testGetStatePrefixesWithOverrides()
-    {
-        $overrides = [
-            'XX' => 'Custom State'
-        ];
-        
-        $prefixes = USStates::getStatePrefixes($overrides);
-        
-        $this->assertCount(51, $prefixes);
-        $this->assertContains('AL', $prefixes);
-        $this->assertContains('XX', $prefixes);
-    }
+    expect($territories)
+        ->toHaveKey('DC')
+        ->toHaveKey('PR')
+        ->not->toHaveKey('CA');
+});
 
-    public function testAllMethodsAreStatic()
-    {
-        $reflection = new \ReflectionClass(USStates::class);
-        
-        $this->assertTrue($reflection->getMethod('getStates')->isStatic());
-        $this->assertTrue($reflection->getMethod('getStateNames')->isStatic());
-        $this->assertTrue($reflection->getMethod('getStatePrefixes')->isStatic());
-    }
-}
+test('it gets state name by abbreviation', function (string $abbreviation, string $expectedName) {
+    expect(States::getName($abbreviation))->toBe($expectedName);
+})->with([
+    ['CA', 'California'],
+    ['ca', 'California'],
+    ['NY', 'New York'],
+    ['TX', 'Texas'],
+    ['DC', 'District of Columbia'],
+]);
+
+test('it returns null for invalid abbreviation', function () {
+    expect( States::getName( 'XX' ) )->toBeNull()->and( States::getName( '' ) )->toBeNull();
+});
+
+test('it gets abbreviation by name', function (string $name, string $expectedAbbreviation) {
+    expect(States::getAbbreviation($name))->toBe($expectedAbbreviation);
+})->with([
+    ['California', 'CA'],
+    ['california', 'CA'],
+    ['New York', 'NY'],
+    ['Texas', 'TX'],
+]);
+
+test('it returns null for invalid name', function () {
+    expect( States::getAbbreviation( 'Invalid State' ) )->toBeNull()
+                                                        ->and( States::getAbbreviation( '' ) )->toBeNull();
+});
+
+test('it validates state abbreviation', function () {
+    expect( States::isValidState( 'CA' ) )->toBeTrue()
+                                          ->and( States::isValidState( 'ca' ) )->toBeTrue()
+                                          ->and( States::isValidState( 'DC' ) )->toBeFalse()
+                                          ->and( States::isValidState( 'XX' ) )->toBeFalse();
+});
+
+test('it validates territory abbreviation', function () {
+    expect( States::isValidTerritory( 'DC' ) )->toBeTrue()
+                                              ->and( States::isValidTerritory( 'PR' ) )->toBeTrue()
+                                              ->and( States::isValidTerritory( 'CA' ) )->toBeFalse();
+});
+
+test('it validates any abbreviation', function () {
+    expect( States::isValid( 'CA' ) )->toBeTrue()
+                                     ->and( States::isValid( 'DC' ) )->toBeTrue()
+                                     ->and( States::isValid( 'XX' ) )->toBeFalse();
+});
+
+test('it returns all abbreviations', function () {
+    $abbreviations = States::abbreviations();
+
+    expect($abbreviations)
+        ->toHaveCount(50)
+        ->toContain('CA')
+        ->toContain('NY');
+});
+
+test('it returns all names', function () {
+    $names = States::names();
+
+    expect($names)
+        ->toHaveCount(50)
+        ->toContain('California')
+        ->toContain('New York');
+});
+
+test('it returns correct count', function () {
+    expect(States::count())->toBe(50);
+});
+
+test('it searches states by partial name', function () {
+    $results = States::search('new');
+
+    expect($results)
+        ->toHaveKey('NH')
+        ->toHaveKey('NJ')
+        ->toHaveKey('NM')
+        ->toHaveKey('NY');
+});
+
+test('it returns empty array for empty search', function () {
+    expect( States::search( '' ) )->toBe( [] )
+                                  ->and( States::search( '   ' ) )->toBe( [] );
+});
+
+test('it returns select options', function () {
+    $options = States::asSelectOptions();
+
+    expect($options)
+        ->toHaveKey('CA')
+        ->not->toHaveKey('');
+});
+
+test('it returns select options with placeholder', function () {
+    $options = States::asSelectOptions(false, 'Select a state...');
+
+    expect($options)
+        ->toHaveKey('')
+        ->and($options[''])->toBe('Select a state...');
+});
+
+test('it returns select options with territories', function () {
+    $options = States::asSelectOptions(true);
+
+    expect($options)
+        ->toHaveKey('DC')
+        ->toHaveKey('PR');
+});
+
+test('it returns random state', function () {
+    $random = States::random();
+
+    expect($random)
+        ->toHaveKey('abbreviation')
+        ->toHaveKey('name')
+        ->and(States::isValidState($random['abbreviation']))->toBeTrue();
+});
