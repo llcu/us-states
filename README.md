@@ -1,10 +1,10 @@
-# LLCU US States
+# LLCU - US States
 
-A simple PHP package providing US states data with static method access.
+A PHP package providing US states data with static method access.
 
 ## Requirements
 
-- PHP 8.1 or higher
+- PHP 8.3 or higher
 
 ## Installation
 
