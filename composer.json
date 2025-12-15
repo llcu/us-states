@@ -1,0 +1,30 @@
+{
+    "name": "llcu/us-states-list",
+    "description": "A PHP package that provides a list of US states with static methods",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "llcu"
+        }
+    ],
+    "require": {
+        "php": ">=7.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.0|^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Llcu\\USStatesList\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Llcu\\USStatesList\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}
