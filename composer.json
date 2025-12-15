@@ -1,5 +1,5 @@
 {
-    "name": "llcu/us-states-list",
+    "name": "llcu/us-states",
     "description": "A PHP package providing US states data with static method access",
     "version": "1.0.0",
     "type": "library",
