@@ -70,20 +70,6 @@ final class States
     ];
 
     /**
-     * US territories.
-     *
-     * @var array<string, string>
-     */
-    private const TERRITORIES = [
-        'AS' => 'American Samoa',
-        'DC' => 'District of Columbia',
-        'GU' => 'Guam',
-        'MP' => 'Northern Mariana Islands',
-        'PR' => 'Puerto Rico',
-        'VI' => 'U.S. Virgin Islands',
-    ];
-
-    /**
      * Prevent instantiation.
      */
     private function __construct()
@@ -101,26 +87,6 @@ final class States
     }
 
     /**
-     * Get all US states including territories.
-     *
-     * @return array<string, string> Abbreviation => Name pairs.
-     */
-    public static function allWithTerritories(): array
-    {
-        return array_merge(self::STATES, self::TERRITORIES);
-    }
-
-    /**
-     * Get only US territories.
-     *
-     * @return array<string, string> Abbreviation => Name pairs.
-     */
-    public static function territories(): array
-    {
-        return self::TERRITORIES;
-    }
-
-    /**
      * Get state name by abbreviation.
      *
      * @param string $abbreviation Two-letter state abbreviation.
@@ -132,10 +98,6 @@ final class States
 
         if (isset(self::STATES[$abbreviation])) {
             return self::STATES[$abbreviation];
-        }
-
-        if (isset(self::TERRITORIES[$abbreviation])) {
-            return self::TERRITORIES[$abbreviation];
         }
 
         return null;
@@ -150,7 +112,7 @@ final class States
     public static function getAbbreviation(string $name): ?string
     {
         $name      = trim($name);
-        $allStates = self::allWithTerritories();
+        $allStates = self::all();
         $flipped   = array_flip(array_map('strtolower', $allStates));
         $key       = strtolower($name);
 
@@ -173,17 +135,6 @@ final class States
     }
 
     /**
-     * Check if abbreviation is a valid US territory.
-     *
-     * @param string $abbreviation Two-letter territory abbreviation.
-     * @return bool True if valid territory abbreviation.
-     */
-    public static function isValidTerritory(string $abbreviation): bool
-    {
-        return isset(self::TERRITORIES[strtoupper(trim($abbreviation))]);
-    }
-
-    /**
      * Check if abbreviation is a valid US state or territory.
      *
      * @param string $abbreviation Two-letter abbreviation.
@@ -193,7 +144,7 @@ final class States
     {
         $abbreviation = strtoupper(trim($abbreviation));
 
-        return isset(self::STATES[$abbreviation]) || isset(self::TERRITORIES[$abbreviation]);
+        return isset(self::STATES[$abbreviation]);
     }
 
     /**
@@ -240,7 +191,7 @@ final class States
             return [];
         }
 
-        return array_filter( self::allWithTerritories(), function ( $name ) use ( $query ) {
+        return array_filter( self::all(), function ( $name ) use ( $query ) {
             return str_contains( strtolower( $name ), $query );
         } );
     }
@@ -248,11 +199,10 @@ final class States
     /**
      * Get states as options array for HTML select elements.
      *
-     * @param bool $includeTerritories Include US territories.
      * @param string $placeholder Optional placeholder text.
      * @return array<string, string> Options array.
      */
-    public static function asSelectOptions(bool $includeTerritories = false, string $placeholder = ''): array
+    public static function asSelectOptions(string $placeholder = 'Search...'): array
     {
         $options = [];
 
@@ -260,7 +210,7 @@ final class States
             $options[''] = $placeholder;
         }
 
-        $states = $includeTerritories ? self::allWithTerritories() : self::all();
+        $states = self::all();
 
         foreach ($states as $abbreviation => $name) {
             $options[$abbreviation] = $name;
