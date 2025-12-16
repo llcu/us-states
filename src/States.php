@@ -64,6 +64,7 @@ final class States
         'VT' => 'Vermont',
         'VA' => 'Virginia',
         'WA' => 'Washington',
+        'DC' => 'Washington DC',
         'WV' => 'West Virginia',
         'WI' => 'Wisconsin',
         'WY' => 'Wyoming',
